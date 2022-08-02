@@ -1,0 +1,19 @@
+# Define here the models for your scraped items
+#
+# See documentation in:
+# https://docs.scrapy.org/en/latest/topics/items.html
+
+import scrapy
+
+
+class TutorialItem(scrapy.Item):
+    # define the fields for your item here like:
+    parsedate = scrapy.Field()
+    link = scrapy.Field()
+    status = scrapy.Field()
+    title = scrapy.Field()
+    newsdate = scrapy.Field()
+    description = scrapy.Field()
+    video_link = scrapy.Field()
+
+    #pass
