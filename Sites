@@ -1,0 +1,277 @@
+#24.kz
+import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+from scrapy.exceptions import CloseSpider
+
+class Tv7Spider(CrawlSpider):
+    name = '24kz'
+    allowed_domains = ['24.kz']
+    start_urls = ['https://24.kz/ru/news/']
+    rules = (
+        Rule(LinkExtractor(allow=('//'), deny=('/tv-projects/', '/teleprogramma/', '/tv-projects/intervyu/', '/archive/', '/specprojecty/dorozhnaya-karta-biznesa-2025/', '/tv-projects/infograifka/', '/specprojecty/', '/live-24-kz/')),
+             callback="parse", follow=True),
+    )
+
+    def parse(self, response):
+        if dateparser.parse(response.xpath('//div[contains(@class, "itemheader")]/header/ul/li/time/text()').get()).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "itemheader")]/header/h1/text()').get()
+            Item['newsdate'] = dateparser.parse(response.xpath('//div[contains(@class, "itemheader")]/header/ul/li/time/text()').get())
+            Item['description'] = response.xpath('//div[contains(@class, "itemFullText")]/p/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "fluid-width-video-wrapper")]/iframe/@src').get()
+            yield Item
+        else:
+            pass
+# scrapy crawl 24kz - s CLOSESPIDER_TIMEOUT = 600
+
+#forbes 
+import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class Tv7Spider(CrawlSpider):
+    name = 'forbes'
+    allowed_domains = ['forbes.kz']
+    start_urls = ['https://forbes.kz']
+    rules = (
+        Rule(LinkExtractor(allow=('/finances/', '/made_in_kz/', '/process/', '/massmedia/', '/travels/', '/auto/'), deny=('/news', '/news/', '/blogs/', '/ranking/', '/authors/', '/archive/', '/lang/', '/photostory/', '/leader/', '/life/', '/woman/', '/video/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if dateparser.parse(str.strip(response.xpath('//div[contains(@class, "article__data is-table")]/div/text()').get())).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "inner-content")]/article/h1/text()').get()
+            Item['newsdate'] = dateparser.parse(str.strip(response.xpath('//div[contains(@class, "article__data is-table")]/div/text()').get()))
+            Item['description'] = response.xpath('//div[contains(@class, "inner-news")]/p/text()|//article[contains(@class, "inner-news")]/p/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "image imagecenter")]/img/@src').get()
+            yield Item
+        else:
+            pass
+ #forbes1
+ import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class Tv7Spider(CrawlSpider):
+    name = 'forbes1'
+    allowed_domains = ['forbes.kz']
+    start_urls = ['https://forbes.kz/']
+    rules = (
+        Rule(LinkExtractor(allow=('/news'), deny=('/news/2022/06/', '/news/2022/05/', '/news/2022/04/', '/news/2022/03/', '/news/2022/02/', '/news/2022/01/', '/news/2021/', '/auto/', '/travels/', '/massmedia/', '/process/', '/made_in_kz/', '/finances/', '/blogs/', '/ranking/', '/authors/', '/archive/', '/lang/', '/photostory/', '/leader/', '/life/', '/woman/', '/video/', '/pages/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if dateparser.parse(response.xpath('//div[contains(@class, "article__date is-tcell")]/span/text()').get()).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "inner-content")]/article/h1/text()').get()
+            Item['newsdate'] = dateparser.parse(response.xpath('//div[contains(@class, "article__date is-tcell")]/span/text()').get())
+            Item['description'] = response.xpath('//div[contains(@class, "inner-news")]/p/text()|//article[contains(@class, "inner-news")]/p/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "image imagecenter")]/img/@src').get()
+            yield Item
+        else:
+            pass
+#inbusiness
+import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class Tv7Spider(CrawlSpider):
+    name = 'inbus'
+    allowed_domains = ['inbusiness.kz']
+    start_urls = ['https://inbusiness.kz/ru/lastnews']
+    rules = (
+        Rule(LinkExtractor(allow=('//'), deny=('/tv_programs/', '/hr/', '/ratings/', '/specprojects/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get()).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "newscont")]/h1/text()').get()
+            Item['newsdate'] = dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get())
+            Item['description'] = response.xpath('//div[contains(@class, "text")]/p/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "newscover")]/img/@src').get()
+            yield Item
+        else:
+            pass
+ #inform
+ import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class Tv7Spider(CrawlSpider):
+    name = 'informburo'
+    allowed_domains = ['informburo.kz']
+    start_urls = ['https://informburo.kz/']
+    rules = (
+        Rule(LinkExtractor(allow=('/novosti/'), deny=('/cards/', '/mneniya/', '/special/', '/law.informburo.kz/', '/page/restrict/', '/kaz/', '/avtory/', '/top/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if dateparser.parse(str.strip(response.xpath('//div[contains(@class, "uk-width-1-1 article-meta")]/small/text()')[1].get())).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = str.strip(response.xpath('//h1/text()').get())
+            Item['newsdate'] = dateparser.parse(str.strip(response.xpath('//div[contains(@class, "uk-width-1-1 article-meta")]/small/text()')[1].get()))
+            Item['description'] = response.xpath('//div[contains(@class, "article")]/p/text()|//div[contains(@class, "article")]/div/p/text()|//div[contains(@class, "article")]/div/article/p/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "uk-grid uk-grid-small")]/img/@src').get()
+            yield Item
+        else:
+            pass
+#Tengri
+import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class Tv7Spider(CrawlSpider):
+    name = 'tengri'
+    allowed_domains = ['tengrinews.kz']
+    start_urls = ['https://tengrinews.kz/kazakhstan_news/page/'+str(c) for c in range(0, 5)
+                  ]
+    rules = (
+        Rule(LinkExtractor(allow=('//'), deny=('/news/', 'kaz.tengrinews.kz', '/page/', '/mixnews/', '/tv/', '/pobediteli/', '/zakon/', 'school_online', '/heroes-among-us/', '/smart-generation/', '/tag/', '/find-out/', '/read/', 'take-look', '/weather/', '/press_releases', '/sitemap/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if dateparser.parse(response.xpath('//li[contains(@class, "tn-hidden@t")]/time/text()').get()).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//h1[contains(@class, "tn-content-title")]/text()').get()
+            Item['newsdate'] = dateparser.parse(response.xpath('//li[contains(@class, "tn-hidden@t")]/time/text()').get())
+            Item['description'] = response.xpath('//article[contains(@class, "tn-news-text")]/p/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "tn-news-content")]/picture/img/@src').get()
+            yield Item
+        else:
+            pass
+#tv7
+import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+
+class Tv7Spider(CrawlSpider):
+    name = 'tv7'
+    allowed_domains = ['tv7.kz']
+    start_urls = ['https://tv7.kz/ru/']
+    rules = (
+        Rule(LinkExtractor(allow=('/ru/'), deny=('/kz/', '/serials/', '/contacts/', '/live/')),
+             callback="parse", follow=True),
+    )
+
+    def parse(self, response):
+        if dateparser.parse(response.xpath('//p[contains(@class, "live-txt")]/text()').get()).date()==date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//h1[contains(@class, "title-archive-item")]/text()').get()
+            Item['newsdate'] = dateparser.parse(response.xpath('//p[contains(@class, "live-txt")]/text()').get())
+            Item['description'] = response.xpath('//div[contains(@class, "now-player ")]/p/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "featured-video-plus")]/div/iframe/@src').get()
+            yield Item
+        else:
+            pass
+ #vlast
+ import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class Tv7Spider(CrawlSpider):
+    name = 'vlast'
+    allowed_domains = ['vlast.kz']
+    start_urls = ['https://vlast.kz/novosti/'+str(x) for x in range(0, 4)]
+    rules = (
+        Rule(LinkExtractor(allow=('/'), deny=('/tags', '/samrukkazyna/', '/quiz/', '/vlas-qazaqsha/', '/gorod/', '/life/', '/explain/', '/gylymfaces/', '/project-syndicate/', '/politika/', '/zhizn/', '/filmy', '/regiony/', '/people/', '/avtory/', '/author/', '/obsshestvo/', '/persona/', '/beeline-business/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if dateparser.parse(str.strip(response.xpath('//ul[contains(@class, "meta item-expand-meta text-uppercase list-inline")]/li/time/text()').get())).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = str.strip(response.xpath('//li[contains(@class, "has-title")]/h1/text()').get())
+            Item['newsdate'] = dateparser.parse(str.strip(response.xpath('//ul[contains(@class, "meta item-expand-meta text-uppercase list-inline")]/li/time/text()').get()))
+            Item['description'] = response.xpath('//div[contains(@class, "default-item-in js-editor js-img-caption js-mediator-article font-edit")]/p/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "default-item-img")]/img/@src').get()
+            yield Item
+        else:
+            pass
+#Zakon
+import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class Tv7Spider(CrawlSpider):
+    name = 'zakon'
+    allowed_domains = ['zakon.kz']
+    start_urls = ['https://www.zakon.kz/news/?p=1', 'https://www.zakon.kz/news/?p=2', 'https://www.zakon.kz/news/?p=3', 'https://www.zakon.kz/news/?p=4', 'https://www.zakon.kz/news/?p=5', 'https://www.zakon.kz/news/?p=6', 'https://www.zakon.kz/news/?p=7', 'https://www.zakon.kz/news/?p=8', 'https://www.zakon.kz/news/?p=9', 'https://www.zakon.kz/news/?p=10']
+    rules = (
+        Rule(LinkExtractor(allow=('//'), deny=('/news/', '/category_open/', '/category/', 'online.zakon.kz', '/kaz.zakon.kz/', '/tags/', '/author/', '/document/', '/price.pdf/', '/01.pdf/', '/02.pdf/', '/privacy_policy/', '/sitemap/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if dateparser.parse(response.xpath('//time[contains(@class, "date")]/text()').get()).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//h1/text()').get()
+            Item['newsdate'] = dateparser.parse(response.xpath('//time[contains(@class, "date")]/text()').get())
+            Item['description'] = response.xpath('//div[contains(@class, "content")]/p/text()|//div[contains(@class, "content")]/ul/li/p/text()|//div[contains(@class, "content")]/p/text()|//div[contains(@class, "content")]/blockquote/text()').getall()
+            Item['video_link'] = response.xpath('//div[contains(@class, "articleImg")]/img/@src').get()
+            yield Item
+        else:
+            pass
