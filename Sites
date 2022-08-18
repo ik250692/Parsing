@@ -1,3 +1,35 @@
+import scrapy
+
+from datetime import datetime, date, timedelta
+import time
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class Tv7Spider(CrawlSpider):
+    name = 'kase'
+    allowed_domains = ['kase.kz']
+    start_urls = ['https://kase.kz/ru/']
+    rules = (
+        Rule(LinkExtractor(allow=('/ru'), deny=('/future-listing-about/', '/private-kase/', '/foreign/', '/subscribers/', '/shares/', '/bonds/', '/mifs/', '/gsecs/', '/currency/', '/repo/', '/futures/', '/stock_market/', '/money_market/', '/mutual_indices/', '/pmi-indicator/', '/tickers/', '/account/', '/reglament/', '/clearing/', '/documents/', '/issuers/', '/esg/', '/disclosure/', '/issuers_diplomas/', '/membership/', '/marketmakers/', '/clearing/', '/dma/', '/members_diplomas/', '/services/', '/daily-market-review/', '/newsletter/', '/kase_connection/', '/tech_support/', '/kase_moex_connection/', '/moex_spectra/', '/kase_rules/', '/legislation/', '/rules_other/', '/events/', '/brochures/', '/publications/', '/presentations/', '/press_releases/', '/history/', '/mission/', '/kase_management/', '/authorities/', '/kase_membership/', '/corporate_documents/', '/museum/', '/shareholders/', '/shareholders_reports/', '/news_for_shareholders/', '/corporate_style/', '/requisites/', '/vacancies/', '/contacts/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        time.sleep(1)
+        if dateparser.parse(response.xpath('//div[contains(@style, "padding:5px;")]/div/text()').get()).date() == date.today()-timedelta(days=1):
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = str.strip(response.xpath('//h1/text()').get())
+            Item['newsdate'] = dateparser.parse(response.xpath('//div[contains(@style, "padding:5px;")]/div/text()').get())
+            Item['description'] = response.xpath('//div[contains(@class, "news-block")]/text()|//div[contains(@class, "news-block")]/a/@href').getall()
+            Item['video_link'] = response.xpath('//link[contains(@rel, "shortcut icon")]/@href').get()
+            yield Item
+        else:
+            pass
+            
 #24.kz
 import scrapy
 
