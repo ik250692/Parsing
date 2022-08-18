@@ -59,8 +59,10 @@ DOWNLOADER_MIDDLEWARES = {
 EXTENSIONS = {
     'scrapy.extensions.telnet.TelnetConsole': 500,
     'scrapy.extensions.corestats.CoreStats': 500,
-}
+    'scrapy.extensions.closespider.CloseSpider': 1800,
 
+}
+CLOSESPIDER_TIMEOUT = 1800
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
