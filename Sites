@@ -1,20 +1,34 @@
+httperror.py
+
 import scrapy
 
 from datetime import datetime, date, timedelta
+# from fake_useragent import UserAgent
 import time
 import dateparser
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
+# ua = UserAgent()
+# ua.update()
 class Tv7Spider(CrawlSpider):
     name = 'kase'
     allowed_domains = ['kase.kz']
-    start_urls = ['https://kase.kz/ru/']
+    a = date.today() - timedelta(days=1)
+    b = a.strftime('%d.%m.%Y')
+    start_urls = ['https://kase.kz/ru/news/'+b+'/'+b]
     rules = (
         Rule(LinkExtractor(allow=('/ru'), deny=('/future-listing-about/', '/private-kase/', '/foreign/', '/subscribers/', '/shares/', '/bonds/', '/mifs/', '/gsecs/', '/currency/', '/repo/', '/futures/', '/stock_market/', '/money_market/', '/mutual_indices/', '/pmi-indicator/', '/tickers/', '/account/', '/reglament/', '/clearing/', '/documents/', '/issuers/', '/esg/', '/disclosure/', '/issuers_diplomas/', '/membership/', '/marketmakers/', '/clearing/', '/dma/', '/members_diplomas/', '/services/', '/daily-market-review/', '/newsletter/', '/kase_connection/', '/tech_support/', '/kase_moex_connection/', '/moex_spectra/', '/kase_rules/', '/legislation/', '/rules_other/', '/events/', '/brochures/', '/publications/', '/presentations/', '/press_releases/', '/history/', '/mission/', '/kase_management/', '/authorities/', '/kase_membership/', '/corporate_documents/', '/museum/', '/shareholders/', '/shareholders_reports/', '/news_for_shareholders/', '/corporate_style/', '/requisites/', '/vacancies/', '/contacts/')),
              callback="parse", follow=True),
     )
+    def parse1(self, response):
+        if response.url != 200:
+            Item = TutorialItem()
+            Item['parsedate'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+
     def parse(self, response):
         time.sleep(1)
         if dateparser.parse(response.xpath('//div[contains(@style, "padding:5px;")]/div/text()').get()).date() == date.today()-timedelta(days=1):
@@ -136,24 +150,37 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'inbus'
     allowed_domains = ['inbusiness.kz']
-    start_urls = ['https://inbusiness.kz/ru/lastnews']
+    start_urls = ['https://inbusiness.kz/ru/lastnews'] #https://inbusiness.kz/ru/lastnews
+    handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
         Rule(LinkExtractor(allow=('//'), deny=('/tv_programs/', '/hr/', '/ratings/', '/specprojects/')),
              callback="parse", follow=True),
     )
     def parse(self, response):
-        if dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get()).date() == date.today()-timedelta(days=1):
+        if response.status == 200:
+            if dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get()).date() == date.today()-timedelta(days=1):
+                Item = TutorialItem()
+                Item['parsedate'] = datetime.now()
+                Item['link'] = response.url
+                Item['status'] = response.status
+                Item['title'] = response.xpath('//div[contains(@class, "newscont")]/h1/text()').get()
+                Item['newsdate'] = dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get())
+                Item['description'] = response.xpath('//div[contains(@class, "text")]/p/text()').getall()
+                Item['video_link'] = response.xpath('//div[contains(@class, "newscover")]/img/@src').get()
+                yield Item
+        elif response.status != 200:
             Item = TutorialItem()
             Item['parsedate'] = datetime.now()
             Item['link'] = response.url
             Item['status'] = response.status
-            Item['title'] = response.xpath('//div[contains(@class, "newscont")]/h1/text()').get()
-            Item['newsdate'] = dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get())
-            Item['description'] = response.xpath('//div[contains(@class, "text")]/p/text()').getall()
-            Item['video_link'] = response.xpath('//div[contains(@class, "newscover")]/img/@src').get()
+            Item['title'] = 'Empty'
+            Item['newsdate'] = 'Empty'
+            Item['description'] = 'Empty'
+            Item['video_link'] = 'Empty'
             yield Item
         else:
             pass
+            
  #inform
  import scrapy
 
