@@ -1,32 +1,21 @@
-import schedule, time
+# import schedule, time
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
+process = CrawlerProcess(get_project_settings())
 
-def start_spider():
-    try:
-        process = CrawlerProcess(get_project_settings())
+process.crawl('tengri')
+process.crawl('zakon')
+process.crawl('tv7')
+process.crawl('inbus')
+process.crawl('informburo')
+process.crawl('kazinform')
+process.crawl('kase')
+process.crawl('vlast')
+process.crawl('forbes')
+process.crawl('forbes1')
+process.crawl('24kz')
+process.start()
 
-        process.crawl('tengri')
-        process.crawl('zakon')
-        process.crawl('tv7')
-        process.crawl('inbus')
-        process.crawl('informburo')
-        process.crawl('kase')
-        process.crawl('vlast')
-        process.crawl('forbes')
-        process.crawl('forbes1')
-        process.crawl('24kz')
-        process.start()
-        now_time = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-    except Exception as e:
-        print('-Ошибка', e)
 
-def main():
-    print('-В ожидании')
-    schedule.every().day.at("00:30").do(start_spider)
-    while True:
-        schedule.run_pending()
-        time.sleep(10)
-if __name__=='__main__':
-    main()
+
