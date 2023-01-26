@@ -5,15 +5,14 @@
 
 import scrapy
 
-
 class TutorialItem(scrapy.Item):
     # define the fields for your item here like:
-    parsedate = scrapy.Field()
+    date_parse = scrapy.Field()
     link = scrapy.Field()
     status = scrapy.Field()
     title = scrapy.Field()
-    newsdate = scrapy.Field()
+    date_news = scrapy.Field()
     description = scrapy.Field()
-    video_link = scrapy.Field()
+    link_img = scrapy.Field()
 
-    #pass
+    # pass
