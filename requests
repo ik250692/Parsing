@@ -1,9 +1,0 @@
-import requests
-
-
-response = requests.get('https://handyhost.ru/I/')
-
-if response.status_code != 200:
-    print('handyhost wrong!')
-else:
-    print('OK!')
