@@ -6,14 +6,16 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
+from itemadapter import ItemAdapter
+
 
 import psycopg2
 class TutorialPipeline(object):
     def open_spider(self, spider):
-        hostname = 'localhost'
+        hostname = '10.4.96.3'
         username = 'postgres'
-        password = 'postgres'  # your password
-        database = 'postgres'
+        password = 'daim123DAIM'  # your password
+        database = 'News_mon'
         self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
         self.cur = self.connection.cursor()
 
@@ -21,16 +23,17 @@ class TutorialPipeline(object):
         self.cur.close()
         self.connection.close()
 
+
     def process_item(self, item, spider):
         self.cur.execute(
-            "insert into tv_7(parsedate,link,status,title,newsdate,description,video_link) values(%s,%s,%s,%s,%s,%s,%s)",
-            (item['parsedate'],
+            "insert into t_first_news(date_parse,link,status,title,date_news,description,link_img) values(%s,%s,%s,%s,%s,%s,%s)",
+            (item['date_parse'],
              item['link'],
              item['status'],
              item['title'],
-             item['newsdate'],
+             item['date_news'],
              item['description'],
-             item['video_link']))
+             item['link_img']))
         self.connection.commit()
         return item
 
