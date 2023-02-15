@@ -1,42 +1,41 @@
+import scrapy
 from datetime import datetime, date, timedelta
+import time
 import dateparser
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
 
-# from fake_useragent import UserAgent
-# ua = UserAgent()
-# ua.update()
-
-
 class Tv7Spider(CrawlSpider):
     name = '24kz'
     allowed_domains = ['24.kz']
-    start_urls = ['https://24.kz/ru/news/']
+    a = date.today() - timedelta(days=1)
+    b = a.strftime('%Y-%m-%d')
+    start_urls = ['https://24.kz/ru/']
     handle_httpstatus_list = {401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500,
                               501, 502, 503, 504, 505}
     rules = (
-        Rule(LinkExtractor(allow='//', deny=['/tv-projects/', '/teleprogramma/', '/tv-projects/intervyu/', '/archive/',
-                                             '/specprojecty/dorozhnaya-karta-biznesa-2025/',
-                                             '/tv-projects/infograifka/', '/specprojecty/', '/live-24-kz/']),
+        Rule(LinkExtractor(allow=('/news/'), deny=('/kz/', '/ru/tv-projects/', '/ru/teleprogramma/', '/ru/tv-projects/intervyu/', '/ru/live-24-kz/', '/ru/poslanie-2022/', '/ru/referundum/', '/ru/vybory-2022/', '/ru/mazhilis2023/', '/ru/news/itemlist/tag/', '/ru/news/vypuski-novostej')),
              callback="parse", follow=True),
     )
-        def parse(self, response):
+
+    def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(response.xpath(
-                     response.xpath('//div[contains(@class, "post-meta-author")]/time/text()').get()).date() == date.today() - timedelta(
-                    days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = response.xpath('//div[contains(@class, "entry-title")]/h1/text()').get()
-                Item['date_news'] = dateparser.parse(
-                    response.xpath('//div[contains(@class, "post-meta-author")]/time/text()').get())
+            time.sleep(20)
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "entry-title")]/h1/text()').get()
+            date_news = dateparser.parse(response.xpath('//div[contains(@class, "post-meta-author")]/time/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "entry-content")]/p/text()').getall()
                 Item['link_img'] = '24.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -49,8 +48,6 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-
-
 import scrapy
 
 from datetime import datetime, date, timedelta
@@ -66,6 +63,7 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'forbes'
     allowed_domains = ['forbes.kz']
+    a = date.today() - timedelta(days=1)
     start_urls = ['https://forbes.kz']
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
@@ -74,16 +72,19 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(str.strip(response.xpath('//div[contains(@class, "article__data is-table")]/div/text()').get())).date() == date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = response.xpath('//div[contains(@class, "inner-content")]/article/h1/text()').get()
-                Item['date_news'] = dateparser.parse(str.strip(response.xpath('//div[contains(@class, "article__data is-table")]/div/text()').get()))
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "inner-content")]/article/h1/text()').get()
+            date_news =  dateparser.parse(str.strip(response.xpath('//div[contains(@class, "article__data is-table")]/div/text()').get()))
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "inner-news")]/p/text()|//article[contains(@class, "inner-news")]/p/text()').getall()
                 Item['link_img'] = 'forbes.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -96,8 +97,6 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-
-
 import scrapy
 
 from datetime import datetime, date, timedelta
@@ -112,6 +111,7 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'forbes1'
     allowed_domains = ['forbes.kz']
+    a = date.today() - timedelta(days=1)
     start_urls = ['https://forbes.kz/']
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
@@ -120,16 +120,19 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(response.xpath('//div[contains(@class, "article__date is-tcell")]/span/text()').get()).date() == date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = response.xpath('//div[contains(@class, "inner-content")]/article/h1/text()').get()
-                Item['date_news'] = dateparser.parse(response.xpath('//div[contains(@class, "article__date is-tcell")]/span/text()').get())
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "inner-content")]/article/h1/text()').get()
+            date_news = dateparser.parse(response.xpath('//div[contains(@class, "article__date is-tcell")]/span/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "inner-news")]/p/text()|//article[contains(@class, "inner-news")]/p/text()').getall()
                 Item['link_img'] = 'forbes.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -142,9 +145,7 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-
-
-import scrapy
+ import scrapy
 
 from datetime import datetime, date, timedelta
 import dateparser
@@ -158,24 +159,31 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'inbus'
     allowed_domains = ['inbusiness.kz']
-    start_urls = ['https://inbusiness.kz/ru/lastnews']
+    a = date.today() - timedelta(days=1)
+    c = date.today()
+    b = a.strftime('%Y-%m-%d')
+    start_urls = ['https://inbusiness.kz/ru/lastnews?date='+b]
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
-        Rule(LinkExtractor(allow=('//'), deny=('/tv_programs/', '/hr/', '/ratings/', '/specprojects/')),
+        Rule(LinkExtractor(allow=('/last/', '/news/'), deny=('/tv_programs/', '/hr/', '/ratings/', '/specprojects/', '/amp/')),
              callback="parse", follow=True),
     )
+
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get()).date() == date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = response.xpath('//div[contains(@class, "newscont")]/h1/text()').get()
-                Item['date_news'] = dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get())
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "newscont")]/h1/text()').get()
+            date_news = dateparser.parse(response.xpath('//div[contains(@class, "extra")]/time/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "text")]/p/text()').getall()
                 Item['link_img'] = 'inbusiness.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -188,8 +196,7 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-            
- import scrapy
+import scrapy
 from datetime import datetime, date, timedelta
 import dateparser
 from tutorial.items import TutorialItem
@@ -201,6 +208,7 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'informburo'
     allowed_domains = ['informburo.kz']
+    a = date.today() - timedelta(days=1)
     start_urls = ['https://informburo.kz/']
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
@@ -209,16 +217,19 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(str.strip(response.xpath('//div[contains(@class, "uk-width-1-1 article-meta")]/small/text()')[1].get())).date() == date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = str.strip(response.xpath('//h1/text()').get())
-                Item['date_news'] = dateparser.parse(str.strip(response.xpath('//div[contains(@class, "uk-width-1-1 article-meta")]/small/text()')[1].get()))
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = str.strip(response.xpath('//h1/text()').get())
+            date_news = dateparser.parse(str.strip(response.xpath('//div[contains(@class, "uk-width-1-1 article-meta")]/small/text()')[1].get()))
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "article")]/p/text()|//div[contains(@class, "article")]/div/p/text()|//div[contains(@class, "article")]/div/article/p/text()').getall()
-                Item['img_link'] = 'informburo.kz'
+                Item['link_img'] = 'informburo.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -267,19 +278,20 @@ class Tv7Spider(CrawlSpider):
 
     def parse(self, response):
         if response.status == 200:
-            time.sleep(90)
-            if dateparser.parse(response.xpath( '//div[contains(@style, "padding:5px;")]/div/text()').get()).date() == date.today() - timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = str.strip(response.xpath('//h1/text()').get())
-                Item['date_news'] = dateparser.parse(
-                    response.xpath('//div[contains(@style, "padding:5px;")]/div/text()').get())
-                Item['description'] = response.xpath(
-                    '//div[contains(@class, "news-block")]/text()|//div[contains(@class, "news-block")]/a/@href').getall()
+            time.sleep(20)
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = str.strip(response.xpath('//h1/text()').get())
+            date_news = dateparser.parse(response.xpath('//div[contains(@style, "padding:5px;")]/div/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
+                Item['description'] = response.xpath('//div[contains(@class, "news-block")]/text()|//div[contains(@class, "news-block")]/a/@href').getall()
                 Item['link_img'] = 'kase.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -292,8 +304,6 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-
-
 import scrapy
 from datetime import datetime, date, timedelta
 import dateparser
@@ -307,6 +317,7 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'kazinform'
     allowed_domains = ['inform.kz']
+    a = date.today() - timedelta(days=1)
     start_urls = ['https://www.inform.kz/']
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
@@ -315,16 +326,19 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(response.xpath('//div[contains(@class, "time_article_bl")]/text()').get()).date() == date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = str.strip(response.xpath('//div[contains(@class, "title_article_bl")]/h1/text()').get())
-                Item['date_news'] = dateparser.parse(response.xpath('//div[contains(@class, "time_article_bl")]/text()').get())
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = str.strip(response.xpath('//div[contains(@class, "title_article_bl")]/h1/text()').get())
+            date_news = dateparser.parse(response.xpath('//div[contains(@class, "time_article_bl")]/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "body_article_bl")]/p/text()').getall()
                 Item['link_img'] = 'inform.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -337,8 +351,6 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-
-
 import scrapy
 
 from datetime import datetime, date, timedelta
@@ -354,6 +366,7 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'tengri'
     allowed_domains = ['tengrinews.kz']
+    a = date.today() - timedelta(days=1)
     start_urls = ['https://tengrinews.kz/kazakhstan_news/page/'+str(c) for c in range(0, 5)]
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
@@ -362,16 +375,19 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(response.xpath('//li[contains(@class, "tn-hidden@t")]/time/text()').get()).date() == date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = response.xpath('//h1[contains(@class, "tn-content-title")]/text()').get()
-                Item['date_news'] = dateparser.parse(response.xpath('//li[contains(@class, "tn-hidden@t")]/time/text()').get())
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//h1[contains(@class, "tn-content-title")]/text()').get()
+            date_news = dateparser.parse(response.xpath('//li[contains(@class, "tn-hidden@t")]/time/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//article[contains(@class, "tn-news-text")]/p/text()').getall()
                 Item['link_img'] = 'tengrinews.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -384,8 +400,6 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-
-
 import scrapy
 
 from datetime import datetime, date, timedelta
@@ -400,6 +414,7 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'tv7'
     allowed_domains = ['tv7.kz']
+    a = date.today() - timedelta(days=1)
     start_urls = ['https://tv7.kz/ru/']
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
@@ -409,16 +424,19 @@ class Tv7Spider(CrawlSpider):
 
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(response.xpath('//p[contains(@class, "live-txt")]/text()').get()).date()==date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = response.xpath('//h1[contains(@class, "title-archive-item")]/text()').get()
-                Item['date_news'] = dateparser.parse(response.xpath('//p[contains(@class, "live-txt")]/text()').get())
-                Item['description'] = response.xpath('//div[contains(@class, "now-player ")]/p/text()').getall()
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//h1[contains(@class, "title-archive-item")]/text()').get()
+            date_news = dateparser.parse(response.xpath('//p[contains(@class, "live-txt")]/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
+                Item['description'] =response.xpath('//div[contains(@class, "now-player ")]/p/text()').getall()
                 Item['link_img'] = 'tv7.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -431,9 +449,6 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-
-
-
 import scrapy
 
 from datetime import datetime, date, timedelta
@@ -449,6 +464,7 @@ from scrapy.linkextractors import LinkExtractor
 class Tv7Spider(CrawlSpider):
     name = 'vlast'
     allowed_domains = ['vlast.kz']
+    a = date.today() - timedelta(days=1)
     start_urls = ['https://vlast.kz/novosti/'+str(x) for x in range(0, 4)]
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
@@ -457,16 +473,19 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(str.strip(response.xpath('//ul[contains(@class, "meta item-expand-meta text-uppercase list-inline")]/li/time/text()').get())).date() == date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = str.strip(response.xpath('//li[contains(@class, "has-title")]/h1/text()').get())
-                Item['date_news'] = dateparser.parse(str.strip(response.xpath('//ul[contains(@class, "meta item-expand-meta text-uppercase list-inline")]/li/time/text()').get()))
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = str.strip(response.xpath('//li[contains(@class, "has-title")]/h1/text()').get())
+            date_news = dateparser.parse(str.strip(response.xpath('//ul[contains(@class, "meta item-expand-meta text-uppercase list-inline")]/li/time/text()').get()))
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "default-item-in js-editor js-img-caption js-mediator-article font-edit")]/p/text()').getall()
                 Item['link_img'] = 'vlast.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -479,8 +498,6 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
-
-
 import scrapy
 
 from datetime import datetime, date, timedelta
@@ -488,14 +505,13 @@ import dateparser
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-# from fake_useragent import UserAgent
-# ua = UserAgent()
-# ua.update()
+
 
 
 class Tv7Spider(CrawlSpider):
     name = 'zakon'
     allowed_domains = ['zakon.kz']
+    a = date.today() - timedelta(days=1)
     start_urls = ['https://www.zakon.kz/news/?p=1', 'https://www.zakon.kz/news/?p=2', 'https://www.zakon.kz/news/?p=3', 'https://www.zakon.kz/news/?p=4', 'https://www.zakon.kz/news/?p=5', 'https://www.zakon.kz/news/?p=6', 'https://www.zakon.kz/news/?p=7', 'https://www.zakon.kz/news/?p=8', 'https://www.zakon.kz/news/?p=9', 'https://www.zakon.kz/news/?p=10']
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
@@ -504,16 +520,19 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
-            if dateparser.parse(response.xpath('//time[contains(@class, "date")]/text()').get()).date() == date.today()-timedelta(days=1):
-                Item = TutorialItem()
-                Item['date_parse'] = datetime.now()
-                Item['link'] = response.url
-                Item['status'] = response.status
-                Item['title'] = response.xpath('//h1/text()').get()
-                Item['date_news'] = dateparser.parse(response.xpath('//time[contains(@class, "date")]/text()').get())
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//h1/text()').get()
+            date_news = dateparser.parse(response.xpath('//time[contains(@class, "date")]/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "content")]/p/text()|//div[contains(@class, "content")]/ul/li/p/text()|//div[contains(@class, "content")]/p/text()|//div[contains(@class, "content")]/blockquote/text()').getall()
                 Item['link_img'] = 'zakon.kz'
                 yield Item
+            else:
+                pass
         elif response.status != 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
@@ -526,5 +545,197 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
+import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 
 
+class Tv7Spider(CrawlSpider):
+    name = 'kapital'
+    allowed_domains = ['kapital.kz']
+    a = date.today() - timedelta(days=1)
+    b = a.strftime('%Y-%m-%d')
+    start_urls = ['https://kapital.kz/news?page=1', 'https://kapital.kz/news?page=2', 'https://kapital.kz/news?page=3', 'https://kapital.kz/news?page=4']
+    handle_httpstatus_list = {401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500,
+                              501, 502, 503, 504, 505}
+    rules = (
+        Rule(LinkExtractor(allow='/', deny=('/lifestyle', '/dossiers', '/project/brands')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if response.status == 200:
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "main__page")]/article/header/h1/text()').get()
+            date_news = dateparser.parse(response.xpath('//div[contains(@class, "article__info information-article")]/time/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
+                Item['description'] = response.xpath('//div[contains(@class, "article__body")]/div/p/text()').getall()
+                Item['link_img'] = 'kapital.kz'
+                yield Item
+            else:
+                pass
+        elif response.status != 200:
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = 'Empty'
+            Item['date_news'] = date.today() - timedelta(days=1)
+            Item['description'] = 'Empty'
+            Item['link_img'] = 'kapital.kz'
+            yield Item
+        else:
+            pass
+import scrapy
+from datetime import datetime, date, timedelta
+import dateparser
+import time
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+
+class Tv7Spider(CrawlSpider):
+    name = 'kt'
+    allowed_domains = ['kt.kz']
+    a = date.today() - timedelta(days=1)
+    start_urls = ['https://www.kt.kz/rus/all']
+    handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
+    rules = (
+        Rule(LinkExtractor(allow=('//'), deny=('/video/', '/gallery/', '/pisma_v_redakciu/')),
+             callback="parse", follow=True),)
+    def parse(self, response):
+        if response.status == 200:
+            time.sleep(20)
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//header[contains(@class, "page-heading")]/h1/text()').get()
+            date_news = dateparser.parse(response.xpath('//div[contains(@class, "page-meta")]/span/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
+                Item['description'] = response.xpath('//div[contains(@class, "page-content")]/div/text()').getall()
+                Item['link_img'] = 'kt.kz'
+                yield Item
+            else:
+                pass
+        elif response.status != 200:
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = 'Empty'
+            Item['date_news'] = date.today()-timedelta(days=1)
+            Item['description'] = 'Empty'
+            Item['link_img'] = 'kt.kz'
+            yield Item
+        else:
+            pass
+import scrapy
+from datetime import datetime, date, timedelta
+import dateparser
+import time
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+
+class Tv7Spider(CrawlSpider):
+    name = 'nurkz'
+    allowed_domains = ['nur.kz']
+    a = date.today() - timedelta(days=1)
+    month = str(a.month).lstrip('0')
+    day = str(a.day).lstrip('0')
+    b = f'{a.year}/{month}/{day}'
+    start_urls = ['https://www.nur.kz/archive/'+b]
+    handle_httpstatus_list = {401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500,
+                              501, 502, 503, 504, 505}
+    rules = (Rule(LinkExtractor(allow=('//'), deny=('/family', '/showbiz', '/project/brands')),
+             callback="parse", follow=True),
+             )
+    def parse(self, response):
+        if response.status == 200:
+            time.sleep(20)
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//article[contains(@class, "article")]/h1/text()').get()
+            date_str = str.strip(response.xpath('//div[contains(@class, "layout-content-type-page__wrapper-block")]/p/time/text()').get())
+            date_str = date_str.replace('Вчера, ', '')
+            date_str = date_str.split(',')[0]
+            date_obj = dateparser.parse(date_str, languages=['ru'])
+            if date_obj.date() == self.a:
+                Item['date_news'] = date_obj.strftime('%d %B %Y')
+                Item['description'] = response.xpath('//div[contains(@class, "formatted-body io-article-body")]/p/text()|//p[contains(@class, "align-left formatted-body__paragraph")]/strong/text()').getall()
+                Item['link_img'] = 'nur.kz'
+                yield Item
+            else:
+                pass
+        elif response.status != 200:
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = 'Empty'
+            Item['date_news'] = date.today() - timedelta(days=1)
+            Item['description'] = 'Empty'
+            Item['link_img'] = 'nur.kz'
+            yield Item
+        else:
+            pass
+import scrapy
+
+from datetime import datetime, date, timedelta
+import dateparser
+from tutorial.items import TutorialItem
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+
+class Tv7Spider(CrawlSpider):
+    name = 'sputnik'
+    allowed_domains = ['ru.sputnik.kz']
+    a = date.today() - timedelta(days=1)
+    b = a.strftime('%Y%m%d')
+    start_urls = ['https://ru.sputnik.kz/'+b+'/']
+    handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
+    rules = (
+        Rule(LinkExtractor(allow=('/'), deny=('docs/', 'cms/', 'app/')),
+             callback="parse", follow=True),
+    )
+    def parse(self, response):
+        if response.status == 200:
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = response.xpath('//div[contains(@class, "article__header")]/h1/text()').get()
+            date_news = dateparser.parse(response.xpath('//div[contains(@class, "article__info-date")]/a/text()').get())
+            if date_news.date() == self.a:
+                Item['date_news'] = date_news
+                Item['description'] = response.xpath('//div[contains(@class, "article__text")]/text()').getall()
+                Item['link_img'] = 'sputnik.kz'
+                yield Item
+            else:
+                pass
+        elif response.status != 200:
+            Item = TutorialItem()
+            Item['date_parse'] = datetime.now()
+            Item['link'] = response.url
+            Item['status'] = response.status
+            Item['title'] = 'Empty'
+            Item['date_news'] = date.today()-timedelta(days=1)
+            Item['description'] = 'Empty'
+            Item['link_img'] = 'sputnik.kz'
+            yield Item
+        else:
+            pass
