@@ -21,3 +21,6 @@ C:\Users\Ким>tracert 149.154.167.51
 Трассировка завершена.
 
 C:\Users\Ким>
+
+INFO:telethon.network.mtprotosender:Connecting to 149.154.167.51:443/TcpFull...
+DEBUG:telethon.network.mtprotosender:Connection attempt 1...
