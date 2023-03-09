@@ -32,15 +32,16 @@ class Tv7Spider(CrawlSpider):
              callback="parse", follow=True),
     )
 
-    def parse(self, response):
+     def parse(self, response):
         if response.status == 200:
-            time.sleep(20)
+            time.sleep(10)
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
             Item['link'] = response.url
             Item['status'] = response.status
             Item['title'] = str.strip(response.xpath('//h1/text()').get())
-            date_news = dateparser.parse(response.xpath('//div[contains(@style, "padding:5px;")]/div/text()').get())
+            date_str = response.xpath('//div[contains(@style, "padding:5px;")]/div/text()').get()
+            date_news = datetime.strptime(date_str, '%d.%m.%y, %H:%M')
             if date_news.date() == self.a:
                 Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "news-block")]/text()|//div[contains(@class, "news-block")]/a/@href').getall()
