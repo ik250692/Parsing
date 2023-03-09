@@ -22,12 +22,13 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
+            time.sleep(3)
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
             Item['link'] = response.url
             Item['status'] = response.status
             Item['title'] = response.xpath('//h1[contains(@class, "tn-content-title")]/text()').get()
-            date_news = dateparser.parse(response.xpath('//li[contains(@class, "tn-hidden@t")]/time/text()').get())
+            date_news = dateparser.parse(response.xpath('//div[contains(@class, "tn-side-bar")]/time/text()').get())
             if date_news.date() == self.a:
                 Item['date_news'] = date_news
                 Item['description'] = response.xpath('//article[contains(@class, "tn-news-text")]/p/text()').getall()
