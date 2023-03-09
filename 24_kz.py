@@ -12,7 +12,7 @@ class Tv7Spider(CrawlSpider):
     allowed_domains = ['24.kz']
     a = date.today() - timedelta(days=1)
     b = a.strftime('%Y-%m-%d')
-    start_urls = ['https://24.kz/ru/']
+    start_urls = ['https://24.kz/ru/top-news', 'https://24.kz/ru/news/novosti-kazakhstana']
     handle_httpstatus_list = {401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500,
                               501, 502, 503, 504, 505}
     rules = (
@@ -20,15 +20,18 @@ class Tv7Spider(CrawlSpider):
              callback="parse", follow=True),
     )
 
-    def parse(self, response):
+        def parse(self, response):
         if response.status == 200:
-            time.sleep(20)
+            time.sleep(3)
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
             Item['link'] = response.url
             Item['status'] = response.status
             Item['title'] = response.xpath('//div[contains(@class, "entry-title")]/h1/text()').get()
-            date_news = dateparser.parse(response.xpath('//div[contains(@class, "post-meta-author")]/time/text()').get())
+            date_str = response.xpath('//div[contains(@class, "post-meta-author")]/time/text()').get()
+            date_news = datetime.strptime(date_str.strip(), '%H:%M, %d.%m.%Y')
+            print(f'date_news = {date_news}')
+            print(self.a)
             if date_news.date() == self.a:
                 Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "entry-content")]/p/text()').getall()
