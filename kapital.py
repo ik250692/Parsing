@@ -21,14 +21,17 @@ class Tv7Spider(CrawlSpider):
     )
     def parse(self, response):
         if response.status == 200:
+            time.sleep(5)
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
             Item['link'] = response.url
             Item['status'] = response.status
             Item['title'] = response.xpath('//div[contains(@class, "main__page")]/article/header/h1/text()').get()
-            date_news = dateparser.parse(response.xpath('//div[contains(@class, "article__info information-article")]/time/text()').get())
+            date_str = response.xpath('//div[contains(@class, "article__info information-article")]/time/text()').get()
+            date_news = datetime.strptime(date_str, '%d.%m.%Y · %H:%M')
+            print(f'date_news = {date_news}')
             if date_news.date() == self.a:
-                Item['date_news'] = date_news
+                Item['date_news'] = date_news.date()
                 Item['description'] = response.xpath('//div[contains(@class, "article__body")]/div/p/text()').getall()
                 Item['link_img'] = 'kapital.kz'
                 yield Item
