@@ -2,6 +2,7 @@ import scrapy
 
 from datetime import datetime, date, timedelta
 import dateparser
+import time
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
@@ -18,14 +19,18 @@ class Tv7Spider(CrawlSpider):
         Rule(LinkExtractor(allow=('/'), deny=('docs/', 'cms/', 'app/')),
              callback="parse", follow=True),
     )
-    def parse(self, response):
+ def parse(self, response):
         if response.status == 200:
+            time.sleep(3)
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
             Item['link'] = response.url
             Item['status'] = response.status
             Item['title'] = response.xpath('//div[contains(@class, "article__header")]/h1/text()').get()
-            date_news = dateparser.parse(response.xpath('//div[contains(@class, "article__info-date")]/a/text()').get())
+            date_str = response.xpath('//div[contains(@class, "article__info-date")]/a/text()').get()
+            date_news = datetime.strptime(date_str, '%H:%M %d.%m.%Y')
+            print(f'date_news = {date_news}')
+            print(self.a)
             if date_news.date() == self.a:
                 Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "article__text")]/text()').getall()
