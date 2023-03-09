@@ -47,3 +47,4 @@ class Tv7Spider(CrawlSpider):
             Item['link_img'] = 'kt.kz'
             yield Item
         else:
+            pass
