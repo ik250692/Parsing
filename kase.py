@@ -1,16 +1,14 @@
 import scrapy
 
 from datetime import datetime, date, timedelta
-# from fake_useragent import UserAgent
 import time
 import dateparser
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
-# ua = UserAgent()
-# ua.update()
-class Tv7Spider(CrawlSpider):
+
+class SpiderKase(CrawlSpider):
     name = 'kase'
     allowed_domains = ['kase.kz']
     a = date.today() - timedelta(days=1)
@@ -31,8 +29,11 @@ class Tv7Spider(CrawlSpider):
         '/vacancies/', '/contacts/')),
              callback="parse", follow=True),
     )
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
 
-     def parse(self, response):
+    def parse(self, response):
         if response.status == 200:
             time.sleep(10)
             Item = TutorialItem()
@@ -41,7 +42,7 @@ class Tv7Spider(CrawlSpider):
             Item['status'] = response.status
             Item['title'] = str.strip(response.xpath('//h1/text()').get())
             date_str = response.xpath('//div[contains(@style, "padding:5px;")]/div/text()').get()
-            date_news = datetime.strptime(date_str, '%d.%m.%y, %H:%M')
+            date_news = datetime.strptime(date_str, '%d.%m.%y %H:%M')
             if date_news.date() == self.a:
                 Item['date_news'] = date_news
                 Item['description'] = response.xpath('//div[contains(@class, "news-block")]/text()|//div[contains(@class, "news-block")]/a/@href').getall()
