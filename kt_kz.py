@@ -7,16 +7,20 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
 
-class Tv7Spider(CrawlSpider):
+class SpiderKt(CrawlSpider):
     name = 'kt'
     allowed_domains = ['kt.kz']
     a = date.today() - timedelta(days=1)
-    start_urls = ['https://www.kt.kz/rus/all']
+    b = a.strftime('%Y-%m-%d')
+    start_urls = ['https://www.kt.kz/rus/archive/'+b]
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
         Rule(LinkExtractor(allow=('//'), deny=('/video/', '/gallery/', '/pisma_v_redakciu/')),
              callback="parse", follow=True),)
- def parse(self, response):
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
+    def parse(self, response):
         if response.status == 200:
             time.sleep(3)
             Item = TutorialItem()
@@ -31,7 +35,7 @@ class Tv7Spider(CrawlSpider):
             print(f'self.a = {self.a}')
             if date_news.date() == self.a:
                 Item['date_news'] = date_news
-                Item['description'] = response.xpath('//div[contains(@class, "page-content")]/div/text()').getall()
+                Item['description'] = response.xpath('(//div[contains(@class, "page-content")])[2]//text()').getall()
                 Item['link_img'] = 'kt.kz'
                 yield Item
             else:
