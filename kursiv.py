@@ -2,12 +2,13 @@ import scrapy
 
 from datetime import datetime, date, timedelta
 import dateparser
+import time
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
 
-class Tv7Spider(CrawlSpider):
+class SpiderKursiv(CrawlSpider):
     name = 'kursiv'
     allowed_domains = ['kz.kursiv.media']
     a = date.today() - timedelta(days=1)
@@ -15,9 +16,12 @@ class Tv7Spider(CrawlSpider):
     start_urls = ['https://kz.kursiv.media/archive/'+b+'/']
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
-        Rule(LinkExtractor(allow=('//'), deny=('docs/', 'cms/', 'app/')),
+        Rule(LinkExtractor(allow=('/'), deny=('docs/', 'cms/', 'app/')),
              callback="parse", follow=True),
     )
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
     def parse(self, response):
         if response.status == 200:
             time.sleep(3)
