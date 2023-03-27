@@ -1,25 +1,28 @@
 import scrapy
-
+import logging
 from datetime import datetime, date, timedelta
 import dateparser
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-# from fake_useragent import UserAgent
-# ua = UserAgent()
-# ua.update()
 
-class Tv7Spider(CrawlSpider):
+
+class Spiderforbes2(CrawlSpider):
     name = 'forbes1'
     allowed_domains = ['forbes.kz']
     a = date.today() - timedelta(days=1)
-    start_urls = ['https://forbes.kz/']
+    b = a.strftime('%Y/%m/%d/')
+    start_urls = ['https://forbes.kz/news/']
     handle_httpstatus_list = [401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 500, 501, 502, 503, 504, 505]
     rules = (
-        Rule(LinkExtractor(allow=('/news'), deny=('/news/2022/06/', '/news/2022/05/', '/news/2022/04/', '/news/2022/03/', '/news/2022/02/', '/news/2022/01/', '/news/2021/', '/auto/', '/travels/', '/massmedia/', '/process/', '/made_in_kz/', '/finances/', '/blogs/', '/ranking/', '/authors/', '/archive/', '/lang/', '/photostory/', '/leader/', '/life/', '/woman/', '/video/', '/pages/')),
+        Rule(LinkExtractor(allow=('/news/'), deny=('/auto/', '/travels/', '/massmedia/', '/process/', '/made_in_kz/', '/blogs/', '/ranking/', '/authors/', '/archive/', '/lang/', '/photostory/', '/leader/', '/woman/', '/video/')),
              callback="parse", follow=True),
     )
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
     def parse(self, response):
+        logging.info(response.body)
         if response.status == 200:
             Item = TutorialItem()
             Item['date_parse'] = datetime.now()
