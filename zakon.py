@@ -8,7 +8,7 @@ from scrapy.linkextractors import LinkExtractor
 
 
 
-class Tv7Spider(CrawlSpider):
+class SpiderZakon(CrawlSpider):
     name = 'zakon'
     allowed_domains = ['zakon.kz']
     a = date.today() - timedelta(days=1)
@@ -18,6 +18,9 @@ class Tv7Spider(CrawlSpider):
         Rule(LinkExtractor(allow=('//'), deny=('/news/', '/category_open/', '/category/', 'online.zakon.kz', '/kaz.zakon.kz/', '/tags/', '/author/', '/document/', '/price.pdf/', '/01.pdf/', '/02.pdf/', '/privacy_policy/', '/sitemap/')),
              callback="parse", follow=True),
     )
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
     def parse(self, response):
         if response.status == 200:
             Item = TutorialItem()
