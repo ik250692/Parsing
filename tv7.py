@@ -5,11 +5,9 @@ import dateparser
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-# from fake_useragent import UserAgent
-# ua = UserAgent()
-# ua.update()
 
-class Tv7Spider(CrawlSpider):
+
+class SpiderTv7(CrawlSpider):
     name = 'tv7'
     allowed_domains = ['tv7.kz']
     a = date.today() - timedelta(days=1)
@@ -19,7 +17,9 @@ class Tv7Spider(CrawlSpider):
         Rule(LinkExtractor(allow=('/ru/'), deny=('/kz/', '/serials/', '/contacts/', '/live/')),
              callback="parse", follow=True),
     )
-
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
     def parse(self, response):
         if response.status == 200:
             Item = TutorialItem()
