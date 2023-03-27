@@ -5,12 +5,10 @@ import dateparser
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-# from fake_useragent import UserAgent
-# ua = UserAgent()
-# ua.update()
 
 
-class Tv7Spider(CrawlSpider):
+
+class SpiderVlast(CrawlSpider):
     name = 'vlast'
     allowed_domains = ['vlast.kz']
     a = date.today() - timedelta(days=1)
@@ -20,6 +18,9 @@ class Tv7Spider(CrawlSpider):
         Rule(LinkExtractor(allow=('/'), deny=('/tags', '/samrukkazyna/', '/quiz/', '/vlas-qazaqsha/', '/gorod/', '/life/', '/explain/', '/gylymfaces/', '/project-syndicate/', '/politika/', '/zhizn/', '/filmy', '/regiony/', '/people/', '/avtory/', '/author/', '/obsshestvo/', '/persona/', '/beeline-business/')),
              callback="parse", follow=True),
     )
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
     def parse(self, response):
         if response.status == 200:
             Item = TutorialItem()
