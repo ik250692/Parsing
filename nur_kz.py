@@ -7,7 +7,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
 
-class Tv7Spider(CrawlSpider):
+class SpiderNurkz(CrawlSpider):
     name = 'nurkz'
     allowed_domains = ['nur.kz']
     a = date.today() - timedelta(days=1)
@@ -20,6 +20,9 @@ class Tv7Spider(CrawlSpider):
     rules = (Rule(LinkExtractor(allow=('//'), deny=('/family', '/showbiz', '/project/brands')),
              callback="parse", follow=True),
              )
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
     def parse(self, response):
         if response.status == 200:
             time.sleep(20)
