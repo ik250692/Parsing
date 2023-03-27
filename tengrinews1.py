@@ -2,15 +2,13 @@ import scrapy
 
 from datetime import datetime, date, timedelta
 import dateparser
+import time
 from tutorial.items import TutorialItem
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-# from fake_useragent import UserAgent
-# ua = UserAgent()
-# ua.update()
 
 
-class Tv7Spider(CrawlSpider):
+class SpiderTengri(CrawlSpider):
     name = 'tengri'
     allowed_domains = ['tengrinews.kz']
     a = date.today() - timedelta(days=1)
@@ -20,6 +18,9 @@ class Tv7Spider(CrawlSpider):
         Rule(LinkExtractor(allow=('//'), deny=('/news/', 'kaz.tengrinews.kz', '/page/', '/mixnews/', '/tv/', '/pobediteli/', '/zakon/', 'school_online', '/heroes-among-us/', '/smart-generation/', '/tag/', '/find-out/', '/read/', 'take-look', '/weather/', '/press_releases', '/sitemap/')),
              callback="parse", follow=True),
     )
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
     def parse(self, response):
         if response.status == 200:
             time.sleep(3)
@@ -48,3 +49,5 @@ class Tv7Spider(CrawlSpider):
             yield Item
         else:
             pass
+
+
