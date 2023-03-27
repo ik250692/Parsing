@@ -8,7 +8,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
 
-class Tv7Spider(CrawlSpider):
+class SpiderSpurnik(CrawlSpider):
     name = 'sputnik'
     allowed_domains = ['ru.sputnik.kz']
     a = date.today() - timedelta(days=1)
@@ -19,7 +19,10 @@ class Tv7Spider(CrawlSpider):
         Rule(LinkExtractor(allow=('/'), deny=('docs/', 'cms/', 'app/')),
              callback="parse", follow=True),
     )
- def parse(self, response):
+    custom_settings = {
+        'CLOSESPIDER_TIMEOUT': 600,
+    }
+    def parse(self, response):
         if response.status == 200:
             time.sleep(3)
             Item = TutorialItem()
