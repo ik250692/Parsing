@@ -1,0 +1,94 @@
+from twisted.internet import reactor, defer
+from scrapy.crawler import CrawlerRunner
+from scrapy.utils.project import get_project_settings
+from tutorial.spiders.kz24 import Spider24kz
+from tutorial.spiders.forbes import Spiderforbes
+from tutorial.spiders.forbes2 import Spiderforbes2
+from tutorial.spiders.inbusiness import SpiderInbus
+from tutorial.spiders.inform import SpiderInform
+from tutorial.spiders.kapital import SpiderKapital
+from tutorial.spiders.kase import SpiderKase
+from tutorial.spiders.kazinform import SpiderKazInform
+from tutorial.spiders.kt_kz import SpiderKt
+from tutorial.spiders.kursiv import SpiderKursiv
+from tutorial.spiders.nur_kz import SpiderNurkz
+from tutorial.spiders.sputnik import SpiderSpurnik
+from tutorial.spiders.tengrinews1 import SpiderTengri
+from tutorial.spiders.tv7 import SpiderTv7
+from tutorial.spiders.vlast import SpiderVlast
+from tutorial.spiders.zakon import SpiderZakon
+import time
+import logging
+import schedule
+
+class Crawler():
+    def crawlJob(self):
+        """
+        Job to start spiders.
+        Return Deferred, which will execute after crawl has completed.
+        """
+        settings = get_project_settings()
+        runner = CrawlerRunner(settings)
+        deferred_list = []
+        deferred_list.append(runner.crawl(Spiderforbes))
+        deferred_list.append(runner.crawl(Spiderforbes2))
+        deferred_list.append(runner.crawl(SpiderInbus))
+        deferred_list.append(runner.crawl(SpiderInform))
+        deferred_list.append(runner.crawl(SpiderKapital))
+        deferred_list.append(runner.crawl(SpiderKase))
+        deferred_list.append(runner.crawl(SpiderKazInform))
+        deferred_list.append(runner.crawl(SpiderKt))
+        deferred_list.append(runner.crawl(SpiderKursiv))
+        deferred_list.append(runner.crawl(SpiderNurkz))
+        deferred_list.append(runner.crawl(SpiderSpurnik))
+        deferred_list.append(runner.crawl(SpiderTengri))
+        deferred_list.append(runner.crawl(SpiderTv7))
+        deferred_list.append(runner.crawl(SpiderVlast))
+        deferred_list.append(runner.crawl(SpiderZakon))
+        deferred_list.append(runner.crawl(Spider24kz))
+        deferred = defer.DeferredList(deferred_list)
+        return deferred
+
+
+
+    def scheduleNextCrawl(self, null, sleep_time):
+        """
+        Schedule the next crawl
+        """
+        reactor.callLater(sleep_time, self.crawl)
+
+    def crawl(self):
+        """
+        A "recursive" function that schedules a crawl 300 seconds after
+        each successful crawl.
+        """
+        # crawlJob() returns a Deferred
+        d = self.crawlJob()
+        # call schedule_next_crawl(<scrapy response>, n) after crawl job is complete
+        d.addCallback(self.scheduleNextCrawl, 86400)
+        d.addErrback(self.catchError)
+
+    def catchError(self, failure):
+        print(failure.value)
+
+    def startCrawling(self):
+        # Schedule crawler every 24 hours (every time that the site refreshes)
+        self.crawl()
+
+        # Starting the process
+        reactor.run()
+
+
+def run_crawler():
+    logging.warning('Starting')
+    Crawler().startCrawling()
+
+
+if __name__ == '__main__':
+    # Schedule the crawler to run every day at 00:00
+    schedule.every().day.at('00:30').do(run_crawler)
+
+    # Keep the script running indefinitely
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
