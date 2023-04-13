@@ -1,0 +1,114 @@
+# Define your item pipelines here
+#
+# Don't forget to add your pipeline to the ITEM_PIPELINES setting
+# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+
+
+# useful for handling different item types with a single interface
+from itemadapter import ItemAdapter
+
+import psycopg2
+import logging
+from datetime import datetime, date, timedelta
+import time
+
+from scrapy import signals
+
+logger = logging.getLogger(__name__)
+
+class TutorialPipeline(object):
+    def open_spider(self, spider):
+        hostname = 'localhost'
+        username = 'postgres'
+        password = 'postgres'
+        database = 'postgres'
+        self.connection = psycopg2.connect(
+            host=hostname,
+            user=username,
+            password=password,
+            dbname=database
+        )
+        self.cur = self.connection.cursor()
+
+    def close_spider(self, spider):
+        self.cur.close()
+        self.connection.close()
+
+    def process_item(self, item, spider):
+        self.cur.execute(
+            "insert into tv_7(date_parse,link,status,title,date_news,description,link_img) values(%s,%s,%s,%s,%s,%s,%s)",
+            (
+                item['date_parse'],
+                item['link'],
+                item['status'],
+                item['title'],
+                item['date_news'],
+                item['description'],
+                item['link_img']
+            )
+        )
+        self.connection.commit()
+        return item
+
+class MyExtension:
+
+    def __init__(self, stats):
+        self.stats = stats
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        ext = cls(crawler.stats)
+        crawler.signals.connect(ext.spider_closed, signal=signals.spider_closed)
+        return ext
+
+    def spider_closed(self, spider):
+        item_scraped_count = self.stats.get_value('item_scraped_count', 0)
+        logger.info(f'spider[{spider.name}] crawled {item_scraped_count} articles')
+        request_bytes = self.stats.get_value('downloader/request_bytes', 0)
+        request_mb = request_bytes / 1048576
+        logger.info(f'spider[{spider.name}] request {request_mb:.2f} MB')
+        finish_reason = self.stats.get_value('finish_reason', 0)
+        logger.info(f'spider[{spider.name}] finish_reason: {finish_reason}')
+        elapsed_time_seconds = self.stats.get_value('elapsed_time_seconds', 0)
+        elapsed_time_minutes = elapsed_time_seconds / 60
+        logger.info(f'spider[{spider.name}] elapsed_time {elapsed_time_seconds} seconds')
+        debug = self.stats.get_value('log_count/DEBUG', 0)
+        logger.info(f'DEBUG: {debug}')
+        error = self.stats.get_value('log_count/ERROR', 0)
+        logger.info(f'ERROR: {error}')
+        info = self.stats.get_value('log_count/INFO', 0)
+        logger.info(f'INFO: {info}')
+        finish = self.stats.get_value('finish_time', 0)
+        finish += timedelta(hours=6)
+        finish_time = finish.strftime('%Y-%m-%d %H:%M')
+        logger.info(f'INFO: {finish_time}')
+        start = self.stats.get_value('start_time', 0)
+        start += timedelta(hours=6)
+        start_time = start.strftime('%Y-%m-%d %H:%M')
+        logger.info(f'INFO: {start_time}')
+
+        conn = psycopg2.connect(
+            host='localhost',
+            user='postgres',
+            password='postgres',
+            port='5432',
+            dbname='postgres'
+        )
+        cursor = conn.cursor()
+
+        print(f"{spider.name}: crawled {item_scraped_count} articles")
+        print(f"{spider.name}: started at {start_time}")
+        print(f"{spider.name}: finished at {finish_time}")
+        print(f"spider[{spider.name}]: request {request_mb:.2f} MB")
+        print(f"spider[{spider.name}]: finish_reason: {finish_reason}")
+        print(f"spider[{spider.name}]: elapsed_time {elapsed_time_minutes} minutes")
+        cursor.execute(
+            'insert into newtable(start_time,finished_time,site,parsed_news,finish_reason,elapsed_time,volume,type_logs) values(%s,%s,%s,%s,%s,%s,%s,%s)',
+            (start_time, finish_time, spider.name, (f"crawled: {item_scraped_count} articles"), (f" finish_reason: {finish_reason}"), (f"elapsed_time: {elapsed_time_minutes} minutes"), (f"spider[{spider.name}]: request {request_mb:.2f} MB"), (f"DEBUG: {debug}, ERROR: {error}, INFO: {info}"))
+        )
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+
